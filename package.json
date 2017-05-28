@@ -10,9 +10,8 @@
     "parse": "^1.9.2",
     "react": "16.0.0-alpha.6",
     "react-native": "0.44.2",
-    "react-native-material-bottom-navigation": "^0.5.1",
-    "react-native-vector-icons": "^4.1.1",
-    "react-navigation": "^1.0.0-beta.11"
+    "react-native-navigation": "^1.1.81",
+    "react-native-vector-icons": "^4.1.1"
   },
   "devDependencies": {
     "babel-jest": "20.0.3",

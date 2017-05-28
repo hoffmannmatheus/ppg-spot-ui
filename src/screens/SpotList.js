@@ -37,8 +37,7 @@ class Spotlist extends Component {
   }
   render() {
     return (
-        <View style={{flex: 1, paddingTop: 22}}>
-          <Text>hue</Text>
+        <View style={{flex: 1}}>
           <ListView
               dataSource={this.state.dataSource}
               renderRow={(rowData) => <Text>{rowData}</Text>}
