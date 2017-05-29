@@ -75,6 +75,7 @@ class App {
         tabFontFamily: 'BioRhyme-Bold',
       },
       appStyle: {
+        orientation: 'portrait',
         tabBarBackgroundColor: '#003a66',
         navBarButtonColor: '#ffffff',
         tabBarButtonColor: '#ffffff',

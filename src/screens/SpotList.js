@@ -38,18 +38,10 @@ class SpotList extends Component {
     this.props.navigator.showModal({
       screen: 'ppg-spots.spots.spot-detail',
       title: spot.get('name'),
+      sharedElements: [`image${spot.id}`],
       passProps: {
         sharedImageId: `image${spot.id}`,
         spot: spot
-      },
-      navigatorStyle: {
-        navBarButtonColor: '#ffffff',
-        navBarTextColor: '#ffffff',
-        navBarTranslucent: true,
-        navBarBackgroundColor: '#eeeeee',
-        showTitleWhenExpended: true,
-        collapsingToolBarImage: {uri: spot.get('picture').url()},
-        collapsingToolBarCollapsedColor: '#0f2362',
       }
     });
   }
