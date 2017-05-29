@@ -34,15 +34,22 @@ class SpotList extends Component {
     );
   }
 
-  goToCard(spot) {
-    this.props.navigator.push({
+  _goToCard(spot) {
+    this.props.navigator.showModal({
       screen: 'ppg-spots.spots.spot-detail',
-      sharedElements: [`image${spot.id}`],
-      animated: false,
-      overrideBackPress: true,
+      title: spot.get('name'),
       passProps: {
         sharedImageId: `image${spot.id}`,
         spot: spot
+      },
+      navigatorStyle: {
+        navBarButtonColor: '#ffffff',
+        navBarTextColor: '#ffffff',
+        navBarTranslucent: true,
+        navBarBackgroundColor: '#eeeeee',
+        showTitleWhenExpended: true,
+        collapsingToolBarImage: {uri: spot.get('picture').url()},
+        collapsingToolBarCollapsedColor: '#0f2362',
       }
     });
   }
@@ -71,7 +78,7 @@ class SpotList extends Component {
         <View style={styles.cardContainer}>
           <TouchableHighlight
               underlayColor={'rgba(0, 0, 0, 0.054)'}
-              onPress={() => this.goToCard(spot)}>
+              onPress={() => this._goToCard(spot)}>
             <View>
               {this._renderImage(spot)}
               {this._renderContent(spot)}
