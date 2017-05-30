@@ -1,29 +1,31 @@
 import React, { Component } from 'react';
 import {
   ScrollView,
-  TouchableOpacity,
+  TouchableHighlight,
   StyleSheet,
   Image,
   Text,
   View,
-  Platform,
-  ScrolView
+  Platform
 } from 'react-native';
-import { SharedElementTransition } from 'react-native-navigation';
-import * as Animatable from 'react-native-animatable';
 
-const SHOW_DURATION = 400;
-const HIDE_DURATION = 300;
+import * as Animatable from 'react-native-animatable';
+import { Navigation } from 'react-native-navigation';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import StarRating from 'react-native-star-rating';
+
+const SHOW_DURATION = 300;
+const HIDE_DURATION = 250;
 
 class SpotDetail extends Component {
 
   constructor(props) {
     super(props);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    console.log("props:", this.props);
 
     this.state = {
-      animationType: 'fadeInRight',
+      imageAnimationType: 'fadeInDown',
+      contentAnimationType: 'fadeInRight',
       animationDuration: SHOW_DURATION
     }
   }
@@ -31,48 +33,52 @@ class SpotDetail extends Component {
   onNavigatorEvent(event) {
     if (event.id === 'backPress') {
       this.setState({
-        animationType: 'fadeOutRight',
+        imageAnimationType: 'fadeOutUp',
+        contentAnimationType: 'fadeOutRight',
         animationDuration: HIDE_DURATION
       });
       this.props.navigator.pop();
     }
   }
 
+  _onGetDirectionsPressed(spot) {
+    console.log("pressed....");
+    this.props.navigator.showSnackbar({
+      text: 'Directions pressed',
+      actionId: 'fabClicked', // Mandatory if you've set actionText
+      actionColor: 'green',
+      textColor: 'red',
+      backgroundColor: 'blue',
+      duration: 'indefinite'
+    });
+    Navigation.showInAppNotification('Directions pressed!');
+  }
+
+  _formatRatings(value) {
+    return Math.round(value * 10) / 10;
+  }
+
   render() {
     let spot = this.props.spot;
     return (
-        <View style={styles.container}>
-          {this._renderImage(spot)}
-          {this._renderContent(spot)}
-        </View>
+        <ScrollView style={styles.container}>
+          {this._renderImage.call(this, spot)}
+          {this._renderContent.call(this, spot)}
+        </ScrollView>
     );
   }
 
   _renderImage(spot) {
     return (
-        <SharedElementTransition
-            style={styles.imageContainer}
-            sharedElementId={this.props.sharedImageId}
-            showDuration={SHOW_DURATION}
-            hideDuration={HIDE_DURATION}
-            animateClipBounds={true}
-            showInterpolation={
-                    {
-                        type: 'linear',
-                        easing: 'FastOutSlowIn'
-                    }
-                }
-            hideInterpolation={
-                    {
-                        type: 'linear',
-                        easing: 'FastOutSlowIn'
-                    }
-                }
-        >
+        <Animatable.View
+          style={styles.imageContainer}
+          duration={this.state.animationDuration}
+          animation={this.state.imageAnimationType}
+          useNativeDriver={true}>
           <Image
             style={styles.image}
             source={{uri: spot.get('picture').url()}}/>
-        </SharedElementTransition>
+        </Animatable.View>
     );
   }
 
@@ -81,17 +87,53 @@ class SpotDetail extends Component {
         <Animatable.View
             style={styles.content}
             duration={this.state.animationDuration}
-            animation={this.state.animationType}
-            useNativeDriver={true}
-        >
-          <Text style={styles.text}>Line 1</Text>
+            animation={this.state.contentAnimationType}
+            useNativeDriver={true}>
+          <View style={styles.main_section}>
+            <View style={styles.main_section_left}>
+              <Text style={styles.main_section_title}>{spot.get('name')}</Text>
+              <Text style={styles.main_section_subtext}>{spot.get('address') || 'location?'}</Text>
+            </View>
+            <TouchableHighlight
+                underlayColor={'rgba(0, 0, 0, 0.054)'}
+                onPress={() => this._onGetDirectionsPressed(spot)}>
+              <Icon style={styles.action_button} name="directions"  size={30} color="#FFF" />
+            </TouchableHighlight>
+          </View>
+          <View style={styles.ratings_section}>
+            <View style={styles.ratings_section_label_container}>
+              <Text></Text>
+              <Text style={styles.ratings_section_label}>{this._formatRatings(spot.get('overall_rating'))}</Text>
+            </View>
+            <StarRating
+                disabled={true}
+                maxStars={5}
+                starSize={28}
+                starColor={"#00528b"}
+                emptyStarColor={"#00528b"}
+                halfStar={'star-half-full'}
+                emptyStar={'star-o'}
+                fullStar={'star'}
+                iconSet={'FontAwesome'}
+                rating={2.5}/>
+            <Text style={styles.ratings_section_count}>5 reviews</Text>
+          </View>
           <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 3</Text>
-          <Text style={styles.text}>Line 4</Text>
-          <Text style={styles.text}>Line 5</Text>
-          <Text style={styles.text}>Line 6</Text>
-          <Text style={styles.text}>Line 7</Text>
-          <Text style={styles.text}>Line 8</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
+          <Text style={styles.text}>Line 2</Text>
         </Animatable.View>
     );
   }
@@ -101,10 +143,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  content: {
-    flex: 1,
-    marginTop: 190,
-    backgroundColor: 'white'
+  image: {
+    height: 190
   },
   imageContainer: {
     position: 'absolute',
@@ -112,13 +152,65 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  image: {
-    height: 190
+  content: {
+    flex: 1,
+    marginTop: 190,
+    backgroundColor: 'white'
   },
-  text: {
-    fontSize: 17,
-    paddingVertical: 4,
-    paddingLeft: 8
+  main_section: {
+    height: 75,
+    backgroundColor: '#00528b',
+    padding: 8,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  main_section_left: {
+    flex: 1,
+    flexDirection: 'column'
+  },
+  main_section_title: {
+    color: '#fff',
+    fontWeight: '300',
+    fontSize: 18
+  },
+  main_section_subtext: {
+    color: '#fff',
+    fontWeight: '200',
+    fontSize: 14
+  },
+  ratings_section: {
+    padding: 8,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomColor: '#bbb',
+    borderBottomWidth: StyleSheet.hairlineWidth
+  },
+  ratings_section_label_container: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flex:1,
+  },
+  ratings_section_label: {
+    marginRight: 16,
+    fontWeight: '300',
+    fontSize: 15
+  },
+  ratings_section_rating: {
+    flex:1
+  },
+  ratings_section_count: {
+    justifyContent: 'flex-start',
+    flex:1,
+    marginLeft: 16,
+    fontWeight: '300',
+    fontSize: 15
+  },
+  action_button: {
+    margin: 4
   }
 });
 

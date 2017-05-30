@@ -6,13 +6,7 @@ import registerScreens from './screens';
 registerScreens();
 
 
-let iconMap = {};
-
-/*
-() => <Icon size={24} name="list" color="white" />
-() => <Icon size={24} name="pin-drop" color="white" />
-() => <Icon size={24} name="assistant-photo" color="white" />
-*/
+globalIconMap = {};
 
 class App {
   constructor() {
@@ -26,13 +20,18 @@ class App {
   _populateIcons = function () {
     return new Promise(function (resolve, reject) {
       Promise.all([
-            Icon.getImageSource('list', 24),
-            Icon.getImageSource('map', 24),
-            Icon.getImageSource('assistant-photo', 24)
+        Icon.getImageSource('list', 24),
+        Icon.getImageSource('map', 24),
+        Icon.getImageSource('assistant-photo', 24),
+        Icon.getImageSource('add-location', 24, "#fff"),
+        Icon.getImageSource('add-location', 24, "#222")
+
       ]).then((values) => {
-        iconMap['list'] = values[0];
-        iconMap['map'] = values[1];
-        iconMap['top-spotters'] = values[2];
+        globalIconMap['list'] = values[0];
+        globalIconMap['map'] = values[1];
+        globalIconMap['top-spotters'] = values[2];
+        globalIconMap['add-spot-white'] = values[3];
+        globalIconMap['add-spot-dark'] = values[4];
         resolve(true);
       }).catch((error) => {
         console.log(error);
@@ -47,19 +46,19 @@ class App {
         {
           label: 'Spots',
           screen: 'ppg-spots.spots',
-          icon: iconMap['list'],
+          icon: globalIconMap['list'],
           title: 'Spots',
         },
         {
           label: 'Map',
           screen: 'ppg-spots.map',
-          icon: iconMap['map'],
+          icon: globalIconMap['map'],
           title: 'Map',
         },
         {
           label: 'Top Spotters',
           screen: 'ppg-spots.top-spotters',
-          icon: iconMap['top-spotters'],
+          icon: globalIconMap['top-spotters'],
           title: 'Top Spotters',
         }
       ],
@@ -68,7 +67,7 @@ class App {
         navBarButtonColor: '#ffffff',
         tabBarButtonColor: '#ffffff',
         navBarTextColor: '#ffffff',
-        tabBarSelectedButtonColor: '#ff505c',
+        tabBarSelectedButtonColor: '#E11D32',
         navigationBarColor: '#003a66',
         navBarBackgroundColor: '#003a66',
         statusBarColor: '#002b4c',
@@ -80,7 +79,7 @@ class App {
         navBarButtonColor: '#ffffff',
         tabBarButtonColor: '#ffffff',
         navBarTextColor: '#ffffff',
-        tabBarSelectedButtonColor: '#ff505c',
+        tabBarSelectedButtonColor: '#E11D32',
         navigationBarColor: '#003a66',
         navBarBackgroundColor: '#003a66',
         statusBarColor: '#002b4c',

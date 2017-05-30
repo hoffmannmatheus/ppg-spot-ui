@@ -1,17 +1,54 @@
 import React, { Component } from 'react'
 import { Platform, ScrollView, TouchableHighlight, StyleSheet, Image, Text, View, ListView, ActivityIndicator } from 'react-native';
-import { SharedElementTransition } from 'react-native-navigation';
 
 import Parse from 'parse/react-native';
+import Auth from '../helpers/Auth';
 
 const IMAGE_HEIGHT = 190;
 
 class SpotList extends Component {
 
+  // Only add right button if on iOS
+  static navigatorButtons = {
+    rightButtons: Platform.OS === 'ios' ? [
+          {
+            icon: globalIconMap['add-spot-dark'],
+            id: 'add_spot'
+          }
+        ] : null
+  };
+
   constructor (props) {
     super(props);
+
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = { spots: ds.cloneWithRows([  ]), isLoading: true }
+
+    if (Platform.OS == "android") {
+      this._showFab();
+    }
+    this.props.navigator.setOnNavigatorEvent(this._onNavigatorEvent.bind(this));
+  }
+
+  _showFab() {
+    this.props.navigator.setButtons({
+      fab: {
+        collapsedId: 'add_spot',
+        collapsedIcon: globalIconMap['add-spot-white'],
+        expendedId: 'clear',
+        expendedIcon: globalIconMap['add-spot-white'],
+        backgroundColor: '#03A9F4'
+      },
+      animated: true,
+    });
+  };
+
+  _onNavigatorEvent(event) {
+    if (event.type == 'NavBarButtonPress') {
+      if (event.id == 'add_spot') {
+        this._addSpot();
+      }
+    }
   }
 
   _getSpotsAsync() {
@@ -34,16 +71,26 @@ class SpotList extends Component {
     );
   }
 
-  _goToCard(spot) {
+  _goToSpot(spot) {
     this.props.navigator.showModal({
       screen: 'ppg-spots.spots.spot-detail',
       title: spot.get('name'),
-      sharedElements: [`image${spot.id}`],
       passProps: {
-        sharedImageId: `image${spot.id}`,
         spot: spot
       }
     });
+  }
+
+  _addSpot() {
+    if (Auth.isLoggedIn()) {
+      console.log("_addSpot _addSpot _addSpot _addSpot ");
+    } else {
+      this.props.navigator.showModal({
+        screen: 'ppg-spots.signup',
+        animationType: 'slide-up',
+        title: ''
+      });
+    }
   }
 
   componentDidMount () {
@@ -70,7 +117,7 @@ class SpotList extends Component {
         <View style={styles.cardContainer}>
           <TouchableHighlight
               underlayColor={'rgba(0, 0, 0, 0.054)'}
-              onPress={() => this._goToCard(spot)}>
+              onPress={() => this._goToSpot(spot)}>
             <View>
               {this._renderImage(spot)}
               {this._renderContent(spot)}
@@ -82,13 +129,11 @@ class SpotList extends Component {
 
   _renderImage(spot) {
     return (
-        <SharedElementTransition
-            style={styles.imageContainer}
-            sharedElementId={`image${spot.id}`}>
+        <View style={styles.imageContainer}>
           <Image
               style={styles.image}
               source={{uri: spot.get('picture').url()}}/>
-        </SharedElementTransition>
+        </View>
     );
   }
 

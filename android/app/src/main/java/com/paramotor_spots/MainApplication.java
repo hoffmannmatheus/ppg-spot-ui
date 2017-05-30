@@ -27,4 +27,5 @@ public class MainApplication extends NavigationApplication {
     public List<ReactPackage> createAdditionalReactPackages() {
         return getPackages();
     }
+
 }

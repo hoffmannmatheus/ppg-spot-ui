@@ -4,6 +4,7 @@ import SpotList from './SpotList';
 import Map from './Map';
 import TopSpotters from './TopSpotters';
 import SpotDetail from './SpotDetail';
+import SignUp from './SignUp';
 
 export default function () {
   Navigation.registerComponent('ppg-spots.spots', () => SpotList);
@@ -11,4 +12,6 @@ export default function () {
   Navigation.registerComponent('ppg-spots.top-spotters', () => TopSpotters);
 
   Navigation.registerComponent('ppg-spots.spots.spot-detail', () => SpotDetail);
+
+  Navigation.registerComponent('ppg-spots.signup', () => SignUp);
 }
