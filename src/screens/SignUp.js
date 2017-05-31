@@ -6,15 +6,16 @@ import {
   Image,
   Text,
   View,
-  Platform
+  Alert,
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 
-import * as Animatable from 'react-native-animatable';
 import { Navigation } from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Parse from 'parse/react-native';
 
-const SHOW_DURATION = 300;
-const HIDE_DURATION = 250;
+import Auth from '../helpers/Auth';
 
 class SpotDetail extends Component {
   static navigatorStyle = {
@@ -25,21 +26,8 @@ class SpotDetail extends Component {
 
   constructor(props) {
     super(props);
-    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-
     this.state = {
-      animationType: 'fadeInDown',
-      animationDuration: SHOW_DURATION
-    }
-  }
-
-  onNavigatorEvent(event) {
-    if (event.id === 'backPress') {
-      this.setState({
-        animationType: 'fadeOutUp',
-        animationDuration: HIDE_DURATION
-      });
-      this.props.navigator.pop();
+      isSigningUp: false
     }
   }
 
@@ -73,39 +61,85 @@ class SpotDetail extends Component {
                 placeholder="Your Name"
                 autoCapitalize="words"
                 returnKeyType="next"
-                onChangeText={(text) => this.setState({text})}
-                value={this.state.name}/>
+                onChangeText={(name) => this.setState({name})} />
               <SignUpInput
                   placeholder="Email"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   returnKeyType="next"
-                  onChangeText={(text) => this.setState({text})}
-                  value={this.state.name}/>
+                  onChangeText={(email) => this.setState({email})} />
               <SignUpInput
                   placeholder="Password"
                   autoCapitalize="none"
+                  returnKeyType="next"
+                  secureTextEntry={true}
+                  onChangeText={(password) => this.setState({password})} />
+              <SignUpInput
+                  placeholder="Password Confirmation"
+                  autoCapitalize="none"
                   returnKeyType="go"
                   secureTextEntry={true}
-                  onChangeText={(text) => this.setState({text})}
-                  value={this.state.name}
-                  onSubmitEditing={this._doSignup}/>
+                  onChangeText={(password_confirmation) => this.setState({password_confirmation})}
+                  onSubmitEditing={this._doSignUp.bind(this)} />
             </View>
             <View style={styles.buttons}>
-              <Icon.Button name="check" backgroundColor="#FFF"  color="#E11D32" onPress={this._goToLogin}>Sign Up</Icon.Button>
+
+              {this.state.isSigningUp
+                  ? <ActivityIndicator animating={this.state.isSigningUp} style={styles.progress} size={'large'} />
+                  : <Icon.Button name="check" backgroundColor="#FFF"  color="#E11D32" onPress={this._doSignUp.bind(this)}>Sign Up</Icon.Button> }
               <Text style={styles.or}>Already have an account?</Text>
-              <Icon.Button name="login" backgroundColor="#FFF" color="#E11D32" onPress={this._goToLogin}>Login</Icon.Button>
+              <Icon.Button name="login" backgroundColor="#FFF" color="#E11D32" onPress={this._goToLogin.bind(this)}>Login</Icon.Button>
             </View>
           </ScrollView>
         </View>
     );
   }
 
-  _doSignup() {
+  _doSignUp() {
+    if (this.state.isSigningUp || !this._validateData()) {
+      return;
+    }
+    this.state.isSigningUp = true;
+    let user = new Parse.User();
+    user.set("name", this.state.name);
+    user.set("username", this.state.email);
+    user.set("email", this.state.email);
+    user.set("password", this.state.password);
 
+    let instance = this;
+    user.signUp(null, {
+      success: function(user) {
+        console.log("success", user);
+        instance.props.navigator.dismissModal({animationType: 'slide-down'});
+        instance.state.isSigningUp = false;
+      },
+      error: function(user, error) {
+        console.log("error", error);
+        Alert.alert('Sign Up error', (error.code == 202 ? "Email already in use." : error.message), [{text: "Try again"}]);
+        instance.state.isSigningUp = false;
+        }
+    });
   }
+
   _goToLogin() {
 
+  }
+
+  _validateData() {
+    let error;
+    if (!this.state.name || this.state.name.length < 5) {
+      error = "Your name must be at least 5 characters long.";
+    } else if (!Auth.isEmailValid(this.state.email)) {
+      error = "This email is invalid";
+    } else if (!this.state.password || this.state.password.length < 6) {
+      error = "Your password needs to be at least 6 characters long."
+    } else if (this.state.password !== this.state.password_confirmation) {
+      error = "Your password confirmation needs to match."
+    }
+    if (error) {
+      Alert.alert('Oops', error, [{text: 'Got it'}]);
+    }
+    return !error;
   }
 }
 

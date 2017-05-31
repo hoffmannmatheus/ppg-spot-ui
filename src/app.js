@@ -1,6 +1,8 @@
 import { Platform } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 const Icon = require('react-native-vector-icons/MaterialIcons');
+
+import Parse from 'parse/react-native';
 import registerScreens from './screens';
 
 registerScreens();
@@ -10,6 +12,10 @@ globalIconMap = {};
 
 class App {
   constructor() {
+
+    Parse.initialize("ParamotorSpots");
+    Parse.serverURL = "http://104.131.179.248:1338/parse";
+
     this._populateIcons().then(() => {
       this._startApp();
     }).catch((error) => {

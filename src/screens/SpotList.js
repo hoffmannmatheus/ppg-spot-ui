@@ -54,9 +54,6 @@ class SpotList extends Component {
   _getSpotsAsync() {
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-    Parse.initialize("ParamotorSpots");
-    Parse.serverURL = "http://104.131.179.248:1337/parse";
-
     let query = new Parse.Query(Parse.Object.extend("Spot"));
     let instance = this;
     query.find().then(
