@@ -90,8 +90,6 @@ class SpotDetail extends Component {
   }
 
   _doSignUp() {
-    this.refs['emailInput'].getRenderedComponent().refs.refs['emailInput'].focus();
-
     if (this.state.isSigningUp || !this._validateData()) {
       return;
     }
