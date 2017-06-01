@@ -58,7 +58,6 @@ class SpotList extends Component {
     let instance = this;
     query.find().then(
       function(results) {
-        console.log("success got data: ", results);
         instance.setState({ spots: ds.cloneWithRows(results), isLoading: false })
       },
       function(error) {
@@ -81,11 +80,11 @@ class SpotList extends Component {
   _addSpot() {
     if (Auth.isLoggedIn()) {
       console.log("_addSpot _addSpot _addSpot _addSpot ");
+      //Parse.User.logOut().then(console.log);
     } else {
       this.props.navigator.showModal({
-        screen: 'ppg-spots.signup',
-        animationType: 'slide-up',
-        title: ''
+        screen: 'ppg-spots.auth.signup',
+        animationType: 'slide-up'
       });
     }
   }

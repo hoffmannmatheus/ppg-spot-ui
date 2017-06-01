@@ -42,7 +42,6 @@ class SpotDetail extends Component {
   }
 
   _onGetDirectionsPressed(spot) {
-    console.log("pressed....");
     this.props.navigator.showSnackbar({
       text: 'Directions pressed',
       actionId: 'fabClicked', // Mandatory if you've set actionText
@@ -51,7 +50,6 @@ class SpotDetail extends Component {
       backgroundColor: 'blue',
       duration: 'indefinite'
     });
-    Navigation.showInAppNotification('Directions pressed!');
   }
 
   _formatRatings(value) {

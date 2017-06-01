@@ -3,8 +3,10 @@ import { Navigation } from 'react-native-navigation';
 import SpotList from './SpotList';
 import Map from './Map';
 import TopSpotters from './TopSpotters';
-import SpotDetail from './SpotDetail';
-import SignUp from './SignUp';
+import SpotDetail from './spots/SpotDetail';
+import SignUp from './auth/SignUp';
+import Login from './auth/Login';
+import Welcome from './auth/Welcome';
 
 export default function () {
   Navigation.registerComponent('ppg-spots.spots', () => SpotList);
@@ -13,5 +15,7 @@ export default function () {
 
   Navigation.registerComponent('ppg-spots.spots.spot-detail', () => SpotDetail);
 
-  Navigation.registerComponent('ppg-spots.signup', () => SignUp);
+  Navigation.registerComponent('ppg-spots.auth.signup', () => SignUp);
+  Navigation.registerComponent('ppg-spots.auth.login', () => Login);
+  Navigation.registerComponent('ppg-spots.auth.welcome', () => Welcome);
 }

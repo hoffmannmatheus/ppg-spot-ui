@@ -14,7 +14,7 @@ class App {
   constructor() {
 
     Parse.initialize("ParamotorSpots");
-    Parse.serverURL = "http://104.131.179.248:1338/parse";
+    Parse.serverURL = "http://ppg-spots.mhsilva.io:1338/parse";
 
     this._populateIcons().then(() => {
       this._startApp();
@@ -93,6 +93,6 @@ class App {
       }
     });
   }
-};
+}
 
 new App();
