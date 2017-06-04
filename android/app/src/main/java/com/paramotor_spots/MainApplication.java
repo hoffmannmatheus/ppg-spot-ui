@@ -1,5 +1,6 @@
 package com.paramotor_spots;
 
+import com.airbnb.android.react.maps.MapsPackage;
 import com.facebook.react.ReactPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.reactnativenavigation.NavigationApplication;
@@ -18,9 +19,10 @@ public class MainApplication extends NavigationApplication {
     protected List<ReactPackage> getPackages() {
          // Add additional packages you require here
          // No need to add RnnPackage and MainReactPackage
-         return Arrays.<ReactPackage>asList(
-              new VectorIconsPackage()
-         );
+        return Arrays.<ReactPackage>asList(
+            new VectorIconsPackage(),
+            new MapsPackage()
+        );
     }
 
     @Override

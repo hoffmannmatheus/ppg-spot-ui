@@ -11,6 +11,7 @@
     "react": "16.0.0-alpha.6",
     "react-native": "0.44.2",
     "react-native-animatable": "^1.2.0",
+    "react-native-maps": "^0.15.2",
     "react-native-navigation": "^1.1.81",
     "react-native-star-rating": "^1.0.7",
     "react-native-vector-icons": "^4.1.1"
