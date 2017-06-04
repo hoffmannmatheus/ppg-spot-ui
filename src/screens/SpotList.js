@@ -71,9 +71,7 @@ class SpotList extends Component {
     this.props.navigator.showModal({
       screen: 'ppg-spots.spots.spot-detail',
       title: spot.get('name'),
-      passProps: {
-        spot: spot
-      }
+      passProps: {spot}
     });
   }
 
