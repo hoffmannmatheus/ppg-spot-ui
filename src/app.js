@@ -30,14 +30,14 @@ class App {
         Icon.getImageSource('map', 24),
         Icon.getImageSource('assistant-photo', 24),
         Icon.getImageSource('add-location', 24, "#fff"),
-        Icon.getImageSource('add-location', 24, "#222")
+        Icon.getImageSource('send', 24, "#fff"),
 
       ]).then((values) => {
         globalIconMap['list'] = values[0];
         globalIconMap['map'] = values[1];
         globalIconMap['top-spotters'] = values[2];
         globalIconMap['add-spot-white'] = values[3];
-        globalIconMap['add-spot-dark'] = values[4];
+        globalIconMap['send'] = values[4];
         resolve(true);
       }).catch((error) => {
         console.log(error);

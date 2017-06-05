@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View } from 'react-native';
 
-import Location from '../helpers/Location'
-
 class Map extends Component {
 
   render() {
@@ -28,7 +26,7 @@ class GeolocationExample extends React.Component {
           var initialPosition = JSON.stringify(position);
           this.setState({initialPosition});
         },
-        (error) => alert(JSON.stringify(error)),
+        (error) => console.log(JSON.stringify(error)),
         {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
     );
     this.watchID = navigator.geolocation.watchPosition((position) => {

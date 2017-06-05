@@ -8,39 +8,37 @@ const IMAGE_HEIGHT = 190;
 
 class SpotList extends Component {
 
-  // Only add right button if on iOS
-  static navigatorButtons = {
-    rightButtons: Platform.OS === 'ios' ? [
-          {
-            icon: globalIconMap['add-spot-dark'],
-            id: 'add_spot'
-          }
-        ] : null
-  };
-
   constructor (props) {
     super(props);
 
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-    this.state = { spots: ds.cloneWithRows([  ]), isLoading: true }
+    this.state = { spots: ds.cloneWithRows([  ]), isLoading: true };
 
-    if (Platform.OS == "android") {
-      this._showFab();
-    }
+    this._showAction();
     this.props.navigator.setOnNavigatorEvent(this._onNavigatorEvent.bind(this));
   }
 
-  _showFab() {
+  _showAction() {
+    if (Platform.OS === 'ios') {
     this.props.navigator.setButtons({
-      fab: {
-        collapsedId: 'add_spot',
-        collapsedIcon: globalIconMap['add-spot-white'],
-        expendedId: 'clear',
-        expendedIcon: globalIconMap['add-spot-white'],
-        backgroundColor: '#03A9F4'
-      },
+      rightButtons: [{
+        icon: globalIconMap['add-spot-white'],
+        id: 'add_spot'
+      }],
       animated: true,
     });
+  } else {
+      this.props.navigator.setButtons({
+        fab: {
+          collapsedId: 'add_spot',
+          collapsedIcon: globalIconMap['add-spot-white'],
+          expendedId: 'clear',
+          expendedIcon: globalIconMap['add-spot-white'],
+          backgroundColor: '#03A9F4'
+        },
+        animated: true,
+      });
+    }
   };
 
   _onNavigatorEvent(event) {
@@ -77,8 +75,10 @@ class SpotList extends Component {
 
   _addSpot() {
     if (Auth.isLoggedIn()) {
-      console.log("_addSpot _addSpot _addSpot _addSpot ");
-      //Parse.User.logOut().then(console.log);
+      this.props.navigator.showModal({
+        screen: 'ppg-spots.spots.add-spot',
+        animationType: 'slide-up'
+      });
     } else {
       this.props.navigator.showModal({
         screen: 'ppg-spots.auth.signup',
