@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import StarRating from 'react-native-star-rating';
 import MapView from 'react-native-maps';
 import Modal from 'react-native-modal'
+import ImagePicker from 'react-native-image-picker';
 
 import Location from '../../helpers/Location';
 
@@ -44,6 +45,7 @@ class SpotDetail extends Component {
       longitudeDelta: INITIAL_LON_DELTA
     }
   };
+
   constructor(props) {
     super(props);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
@@ -107,7 +109,31 @@ class SpotDetail extends Component {
   }
 
   _addPicture() {
-
+    var options = {
+      title: 'Add picture',
+      takePhotoButtonTitle: 'Camera',
+      chooseFromLibraryButtonTitle: 'Galery',
+      mediaType: 'photo',
+      maxWidth: 1280,
+      maxHeight: 720,
+      quality: 0.9,
+      storageOptions: {
+        skipBackup: true,
+        path: 'images'
+      }
+    };
+    ImagePicker.showImagePicker(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else {
+        let source = { uri: response.uri };
+        this.setState({
+          avatarSource: source
+        });
+      }
+    });
   }
 
   _onMapRegionChange(mapRegion) {
@@ -167,6 +193,7 @@ class SpotDetail extends Component {
                   <Text>Add</Text>
                 </View>
               </TouchableHighlight>
+              <Image style={styles.pictureFrame} source={this.state.avatarSource} />
             </View>
           </View>
 
