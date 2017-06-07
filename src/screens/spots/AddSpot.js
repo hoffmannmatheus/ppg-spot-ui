@@ -6,16 +6,17 @@ import {
   Image,
   Text,
   TextInput,
+  Alert,
   View,
   Platform
 } from 'react-native';
 
 import { Navigation } from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import StarRating from 'react-native-star-rating';
 import MapView from 'react-native-maps';
 import Modal from 'react-native-modal'
 import ImagePicker from 'react-native-image-picker';
+import Parse from 'parse/react-native';
 
 import Location from '../../helpers/Location';
 
@@ -38,6 +39,7 @@ class SpotDetail extends Component {
     name: "",
     description: "",
     currentAddress: '?',
+    picture: null,
     mapRegion: {
       latitude: INITIAL_LAT,
       longitude: INITIAL_LON,
@@ -51,12 +53,13 @@ class SpotDetail extends Component {
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
 
     this.props.navigator.setTitle({
-      title: 'Add a spot'
+      title: 'New paramotor spot'
     });
     this.props.navigator.setButtons({
       rightButtons: [{
         icon: globalIconMap['send'],
-        id: 'add_spot'
+        title: 'save',
+        id: 'save_spot'
       }]
     });
 
@@ -84,6 +87,8 @@ class SpotDetail extends Component {
         animationDuration: HIDE_DURATION
       });
       this.props.navigator.pop();
+    } else if (event.id === 'save_spot') {
+      this._save();
     }
   }
 
@@ -95,24 +100,28 @@ class SpotDetail extends Component {
     this.setState({ isMapModalVisible: false });
   }
 
+  _onMapRegionChange(mapRegion) {
+    this.setState({ mapRegion });
+  }
+
   _updateAddress() {
     Location.getAddress(this.state.mapRegion.latitude, this.state.mapRegion.longitude,
         (err, result) => {
           if (result) {
-            let address = (result.streetName ? (result.streetName + ", ") : "")
-                + result.city + ", "
-                + result.administrativeLevels.level1short + ".";
-            this.setState({currentAddress: address});
+            let address = (result.streetName ? result.streetName + ", " : "")
+                + (result.city ? result.city + ", " : "")
+                + (result.administrativeLevels.level1short ? result.administrativeLevels.level1short + "." : "");
+            this.setState({currentAddress: (address || "?")});
           }
         }
     );
   }
 
   _addPicture() {
-    var options = {
+    const options = {
       title: 'Add picture',
-      takePhotoButtonTitle: 'Camera',
-      chooseFromLibraryButtonTitle: 'Galery',
+      takePhotoButtonTitle: 'Use camera',
+      chooseFromLibraryButtonTitle: 'Pick from gallery',
       mediaType: 'photo',
       maxWidth: 1280,
       maxHeight: 720,
@@ -130,21 +139,38 @@ class SpotDetail extends Component {
       } else {
         let source = { uri: response.uri };
         this.setState({
-          avatarSource: source
+          picture: source
         });
       }
     });
   }
 
-  _onMapRegionChange(mapRegion) {
-    this.setState({ mapRegion });
+  _save() {
+    if (!this._validateData()) {
+      return;
+    }
+  }
+
+
+  _validateData() {
+    let error;
+    if (!this.state.name || this.state.name.length < 5) {
+      error = "The name must be at least 5 characters."
+    }
+    if (!this.state.mapRegion || !this.state.mapRegion.latitude || !this.state.mapRegion.longitude) {
+      error = "The current location cannot be identified. Please use the map to select a location."
+    }
+    if (error) {
+      Alert.alert('Oops', error, [{text: 'Got it'}]);
+    }
+    return !error;
   }
 
   render() {
     return (
         <ScrollView style={styles.container}>
           <View style={styles.formRow}>
-            <Icon style={styles.formRowIcon} name="home" size={24} color="#555" />
+            <Icon style={styles.formRowIcon} name="info-outline" size={24} color="#555" />
 
             <View style={styles.formRowContent}>
               <Text style={styles.formRowTitle}>Name*</Text>
@@ -160,7 +186,8 @@ class SpotDetail extends Component {
                     multiline={false}
                     spellCheck={false}
                     numberOfLines={1}
-                    maxLength={70} />
+                    maxLength={70}
+                    onChangeText={(name) => this.setState({name})} />
               </View>
             </View>
           </View>
@@ -187,13 +214,15 @@ class SpotDetail extends Component {
             <Icon style={styles.formRowIcon} name="photo-camera" size={24} color="#555" />
             <View style={styles.notStretchRowContent}>
               <Text style={styles.formRowTitle}>Pictures</Text>
-              <TouchableHighlight style={styles.pictureFrame} underlayColor="#EEE" onPress={this._addPicture.bind(this)}>
-                <View>
-                  <Icon name="add-a-photo" size={24} color="#555" />
-                  <Text>Add</Text>
-                </View>
-              </TouchableHighlight>
-              <Image style={styles.pictureFrame} source={this.state.avatarSource} />
+              <View style={{flexDirection: 'row'}}>
+                <Image style={styles.pictureFrame} source={this.state.picture} />
+                <TouchableHighlight style={styles.pictureFrame} underlayColor="#EEE" onPress={this._addPicture.bind(this)}>
+                  <View>
+                    <Icon name="add-a-photo" size={24} color="#555" />
+                    <Text>Add</Text>
+                  </View>
+                </TouchableHighlight>
+              </View>
             </View>
           </View>
 
@@ -213,29 +242,13 @@ class SpotDetail extends Component {
                     multiline={true}
                     spellCheck={false}
                     numberOfLines={3}
-                    maxLength={1000} />
+                    maxLength={1000}
+                    onChangeText={(description) => this.setState({description})} />
               </View>
 
             </View>
           </View>
 
-          <View style={styles.formRow}>
-            <Icon style={styles.formRowIcon} name="star" size={24} color="#555" />
-            <View style={styles.notStretchRowContent}>
-              <Text style={styles.formRowTitle}>Ratings</Text>
-              <StarRating
-                  maxStars={5}
-                  starSize={28}
-                  starColor={"#555"}
-                  emptyStarColor={"#555"}
-                  halfStar={'star-half-full'}
-                  emptyStar={'star-o'}
-                  fullStar={'star'}
-                  iconSet={'FontAwesome'}
-                  rating={2.5}/>
-              <Text style={styles.ratings_section_count}>5 reviews</Text>
-            </View>
-          </View>
 
           <Modal
               isVisible={this.state.isMapModalVisible}
@@ -338,6 +351,7 @@ const styles = StyleSheet.create({
   pictureFrame: {
     width: 75,
     height: 75,
+    marginRight: 8,
     borderColor: "#555",
     borderWidth: 1,
     borderRadius: 4,
@@ -347,21 +361,6 @@ const styles = StyleSheet.create({
   input: {
     marginTop: -8,
     color: "#333",
-  },
-
-
-
-  image: {
-    height: 190
-  },
-  imageContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-  action_button: {
-    margin: 4
   }
 });
 
