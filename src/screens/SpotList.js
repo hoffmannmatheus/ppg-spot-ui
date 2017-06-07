@@ -18,6 +18,10 @@ class SpotList extends Component {
     this.props.navigator.setOnNavigatorEvent(this._onNavigatorEvent.bind(this));
   }
 
+  componentDidMount () {
+    this._getSpotsAsync()
+  }
+
   _showAction() {
     if (Platform.OS === 'ios') {
     this.props.navigator.setButtons({
@@ -85,10 +89,6 @@ class SpotList extends Component {
         animationType: 'slide-up'
       });
     }
-  }
-
-  componentDidMount () {
-    this._getSpotsAsync()
   }
 
   render() {

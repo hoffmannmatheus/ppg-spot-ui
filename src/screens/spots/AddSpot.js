@@ -10,25 +10,43 @@ import {
   Platform
 } from 'react-native';
 
-import * as Animatable from 'react-native-animatable';
 import { Navigation } from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import StarRating from 'react-native-star-rating';
+import MapView from 'react-native-maps';
+import Modal from 'react-native-modal'
+
+import Location from '../../helpers/Location';
 
 const SHOW_DURATION = 300;
 const HIDE_DURATION = 250;
 
+const INITIAL_LAT = 37.78825;
+const INITIAL_LON =-122.4324;
+const INITIAL_LAT_DELTA = 0.0922;
+const INITIAL_LON_DELTA = 0.0421;
+
 class SpotDetail extends Component {
 
+  state = {
+    isMapModalVisible: false,
+    imageAnimationType: 'fadeInDown',
+    contentAnimationType: 'fadeInRight',
+    animationDuration: SHOW_DURATION,
+
+    name: "",
+    description: "",
+    currentAddress: '?',
+    mapRegion: {
+      latitude: INITIAL_LAT,
+      longitude: INITIAL_LON,
+      latitudeDelta: INITIAL_LAT_DELTA,
+      longitudeDelta: INITIAL_LON_DELTA
+    }
+  };
   constructor(props) {
     super(props);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-
-    this.state = {
-      imageAnimationType: 'fadeInDown',
-      contentAnimationType: 'fadeInRight',
-      animationDuration: SHOW_DURATION
-    };
 
     this.props.navigator.setTitle({
       title: 'Add a spot'
@@ -39,6 +57,21 @@ class SpotDetail extends Component {
         id: 'add_spot'
       }]
     });
+
+  }
+
+  componentDidMount() {
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          let mapRegion = {latitudeDelta: INITIAL_LAT_DELTA, longitudeDelta: INITIAL_LON_DELTA};
+          mapRegion.latitude = pos.coords.latitude;
+          mapRegion.longitude = pos.coords.longitude;
+          this.setState({mapRegion});
+          this._updateAddress();
+        },
+        (error) => console.log(JSON.stringify(error)),
+        {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+    );
   }
 
   onNavigatorEvent(event) {
@@ -51,12 +84,34 @@ class SpotDetail extends Component {
       this.props.navigator.pop();
     }
   }
-  _chooseMyLocation() {
 
+  _chooseLocation() {
+    this.setState({ isMapModalVisible: true });
+  }
+
+  _chooseLocationDone() {
+    this.setState({ isMapModalVisible: false });
+  }
+
+  _updateAddress() {
+    Location.getAddress(this.state.mapRegion.latitude, this.state.mapRegion.longitude,
+        (err, result) => {
+          if (result) {
+            let address = (result.streetName ? (result.streetName + ", ") : "")
+                + result.city + ", "
+                + result.administrativeLevels.level1short + ".";
+            this.setState({currentAddress: address});
+          }
+        }
+    );
   }
 
   _addPicture() {
 
+  }
+
+  _onMapRegionChange(mapRegion) {
+    this.setState({ mapRegion });
   }
 
   render() {
@@ -71,7 +126,7 @@ class SpotDetail extends Component {
                 <TextInput
                     style={styles.input}
                     placeholder="Ex: Valkaria airport"
-                    placeholderTextColor="#555"
+                    placeholderTextColor="#888"
                     keyboardAppearance="dark"
                     underlineColorAndroid="#555"
                     returnKeyType="next"
@@ -86,9 +141,19 @@ class SpotDetail extends Component {
 
           <View style={styles.formRow}>
             <Icon style={styles.formRowIcon} name="location-on" size={24} color="#555" />
-            <View style={styles.notStretchRowContent}>
+            <View style={styles.formRowContent}>
               <Text style={styles.formRowTitle}>Location*</Text>
-              <Icon.Button name="my-location" backgroundColor="#679"  color="#FFF" onPress={this._chooseMyLocation.bind(this)}>Choose current Location</Icon.Button>
+              <Text style={styles.address}>{this.state.currentAddress}</Text>
+              <View>
+                <MapView
+                    style={styles.mapPreview}
+                    region={this.state.mapRegion}
+                    onRegionChange={this._onMapRegionChange.bind(this)}/>
+                <View
+                  style={styles.mapOverlay}>
+                  <Icon.Button name="my-location" backgroundColor="#2974aa"  color="#FFF" onPress={this._chooseLocation.bind(this)}>Change location</Icon.Button>
+                </View>
+              </View>
             </View>
           </View>
 
@@ -113,7 +178,7 @@ class SpotDetail extends Component {
                 <TextInput
                     style={styles.input}
                     placeholder="Ex: Best take off is facing east. Watch out for fire ants!"
-                    placeholderTextColor="#555"
+                    placeholderTextColor="#888"
                     keyboardAppearance="dark"
                     underlineColorAndroid="#555"
                     returnKeyType="next"
@@ -144,6 +209,24 @@ class SpotDetail extends Component {
               <Text style={styles.ratings_section_count}>5 reviews</Text>
             </View>
           </View>
+
+          <Modal
+              isVisible={this.state.isMapModalVisible}
+              onBackButtonPress={this._chooseLocationDone.bind(this)}
+              onModalHide={this._updateAddress.bind(this)}>
+            <View style={styles.modalStyle}>
+              <MapView
+                  style={styles.fullMap}
+                  region={this.state.mapRegion}
+                  onRegionChange={this._onMapRegionChange.bind(this)}/>
+              <View style={styles.fullMapCenterMarker}>
+                <Icon name="location-on" size={32} color="#C11" />
+              </View>
+              <View style={styles.fullMapDoneButton}>
+                <Icon.Button name="my-location" backgroundColor="#2974aa"  color="#FFF" onPress={this._chooseLocationDone.bind(this)}>Change location</Icon.Button>
+              </View>
+            </View>
+          </Modal>
         </ScrollView>
     );
   }
@@ -155,7 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flexDirection: 'column',
     paddingTop: 4,
-    paddingBottom: 16
+    paddingBottom: 32
   },
   formRow: {
     flexDirection: 'row',
@@ -177,6 +260,53 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 4,
     fontSize: 12
+  },
+  mapPreview: {
+    height: 100,
+  },
+  modalStyle: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  fullMap: {
+    flex: 1,
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  fullMapCenterMarker: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullMapDoneButton: {
+    marginBottom: 32,
+    flexDirection: 'row'
+  },
+  mapOverlay: {
+    flex: 1,
+    height: 100,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  address: {
+    textAlign: 'left',
+    color: "#333"
   },
   pictureFrame: {
     width: 75,
