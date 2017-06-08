@@ -125,7 +125,7 @@ class SpotDetail extends Component {
       mediaType: 'photo',
       maxWidth: 1280,
       maxHeight: 720,
-      quality: 0.9,
+      quality: 0.8,
       storageOptions: {
         skipBackup: true,
         path: 'images'
@@ -137,9 +137,9 @@ class SpotDetail extends Component {
       } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
       } else {
-        let source = { uri: response.uri };
         this.setState({
-          picture: source
+          picture: { uri: response.uri },
+          pictureBase64: response.data
         });
       }
     });
@@ -149,8 +149,33 @@ class SpotDetail extends Component {
     if (!this._validateData()) {
       return;
     }
-  }
 
+    let SpotClass = Parse.Object.extend("Spot");
+    let spot = new SpotClass();
+    let geoPoint = new Parse.GeoPoint({
+      latitude: this.state.mapRegion.latitude,
+      longitude: this.state.mapRegion.longitude
+    });
+    let picture = new Parse.File("spot_"+(new Date()).getTime()+".jpeg",
+        { base64: this.state.pictureBase64 });
+
+    spot.set("name", this.state.name);
+    spot.set("location", geoPoint);
+    spot.set("picture", picture);
+    spot.set("description", this.state.description);
+    spot.set("spotter", Parse.User.current());
+
+    spot.save(null, {
+      success: function(spot) {
+        Alert.alert('Spot saved!', "Your new spot is online! How about leaving its first review?",
+            [{text: 'Let\'s do it'}]);
+        Navigation.dismissModal({animationType: 'slide-down'});
+      },
+      error: function(gameScore, error) {
+        Alert.alert('Failed to save spot', error.message, [{text: 'Try again'}]);
+      }
+    });
+  }
 
   _validateData() {
     let error;
