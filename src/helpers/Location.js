@@ -7,5 +7,11 @@ export default {
     }).catch(function (error) {
       cb(error);
     });
+  },
+
+  metersToMiles: function(meters) {
+    let m = Math.floor(meters) || 1;
+    let kmMileRatio = 0.621371;
+    return (m/1000)*kmMileRatio;
   }
 };

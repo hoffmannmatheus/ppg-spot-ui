@@ -110,7 +110,7 @@ class SpotDetail extends Component {
           if (result) {
             let address = (result.streetName ? result.streetName + ", " : "")
                 + (result.city ? result.city + ", " : "")
-                + (result.administrativeLevels.level1short ? result.administrativeLevels.level1short + "." : "");
+                + (result.administrativeLevels.level1short || "");
             this.setState({currentAddress: (address || "")});
           }
         }
