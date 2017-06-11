@@ -111,7 +111,7 @@ class SpotDetail extends Component {
             let address = (result.streetName ? result.streetName + ", " : "")
                 + (result.city ? result.city + ", " : "")
                 + (result.administrativeLevels.level1short ? result.administrativeLevels.level1short + "." : "");
-            this.setState({currentAddress: (address || "?")});
+            this.setState({currentAddress: (address || "")});
           }
         }
     );
@@ -156,14 +156,18 @@ class SpotDetail extends Component {
       latitude: this.state.mapRegion.latitude,
       longitude: this.state.mapRegion.longitude
     });
-    let picture = new Parse.File("spot_"+(new Date()).getTime()+".jpeg",
-        { base64: this.state.pictureBase64 });
+    let picture = this.state.pictureBase64
+        && new Parse.File("spot_"+(new Date()).getTime()+".jpeg", { base64: this.state.pictureBase64 });
+
 
     spot.set("name", this.state.name);
     spot.set("location", geoPoint);
-    spot.set("picture", picture);
-    spot.set("description", this.state.description);
+    spot.set("shortLocation", this.state.currentAddress);
     spot.set("spotter", Parse.User.current());
+    spot.set("description", this.state.description);
+    if (picture) {
+      spot.set("picture", picture);
+    }
 
     spot.save(null, {
       success: function(spot) {

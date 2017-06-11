@@ -25,7 +25,7 @@ class SpotDetail extends Component {
 
     this.state = {
       imageAnimationType: 'fadeInDown',
-      contentAnimationType: 'fadeInRight',
+      contentAnimationType: 'fadeInUp',
       animationDuration: SHOW_DURATION
     }
   }
@@ -34,7 +34,7 @@ class SpotDetail extends Component {
     if (event.id === 'backPress') {
       this.setState({
         imageAnimationType: 'fadeOutUp',
-        contentAnimationType: 'fadeOutRight',
+        contentAnimationType: 'fadeOutDown',
         animationDuration: HIDE_DURATION
       });
       this.props.navigator.pop();
@@ -116,22 +116,6 @@ class SpotDetail extends Component {
                 rating={2.5}/>
             <Text style={styles.ratings_section_count}>5 reviews</Text>
           </View>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
-          <Text style={styles.text}>Line 2</Text>
         </Animatable.View>
     );
   }
@@ -139,7 +123,10 @@ class SpotDetail extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    flexDirection: 'column',
+    backgroundColor: '#fff',
+
   },
   image: {
     height: 190
@@ -153,7 +140,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginTop: 190,
-    backgroundColor: 'white'
+    flexDirection: 'column',
   },
   main_section: {
     height: 75,
