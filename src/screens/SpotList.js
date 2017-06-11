@@ -1,5 +1,13 @@
 import React, { Component } from 'react'
-import { Platform, ScrollView, TouchableHighlight, StyleSheet, Image, Text, View, ListView, ActivityIndicator } from 'react-native';
+import {
+  Platform,
+  TouchableHighlight,
+  StyleSheet,
+  Image,
+  Text,
+  View,
+  ListView,
+  RefreshControl} from 'react-native';
 
 import Parse from 'parse/react-native';
 import Auth from '../helpers/Auth';
@@ -22,19 +30,23 @@ class SpotList extends Component {
       currentPosition: null
     };
 
-    this._showAction();
     this.props.navigator.setOnNavigatorEvent(this._onNavigatorEvent.bind(this));
   }
 
   componentDidMount () {
-    this._getSpotsAsync()
     navigator.geolocation.getCurrentPosition(
         (pos) => {
           let currentPosition = {latitude: pos.coords.latitude, longitude: pos.coords.longitude};
           this.setState({currentPosition});
+          this._showAction();
+          this._querySpots();
         },
-        (error) => console.log(JSON.stringify(error)),
-        {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+        (error) => {
+          console.log(JSON.stringify(error));
+          this._showAction();
+          this._querySpots();
+        },
+        {enableHighAccuracy: false, timeout: 10000, maximumAge: 5000}
     );
   }
   _showAction() {
@@ -68,20 +80,31 @@ class SpotList extends Component {
     }
   }
 
-  _getSpotsAsync() {
+  _querySpots() {
+    this.setState({isLoading: true});
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
     let query = new Parse.Query(Parse.Object.extend("Spot"));
-    let instance = this;
+    if (this.state.currentPosition) {
+      let geoPoint = new Parse.GeoPoint(this.state.currentPosition);
+      query.near("location", geoPoint);
+    }
+
+    query.limit(30);
+    let that = this;
     query.find().then(
       function(results) {
-        instance.setState({ spots: ds.cloneWithRows(results), isLoading: false })
+        that.setState({ spots: ds.cloneWithRows(results), isLoading: false })
       },
       function(error) {
         console.error("Error: " + error.code + " " + error.message);
-        instance.setState({isLoading: false});
+        that.setState({isLoading: false});
       }
     );
+  }
+
+  _onRefresh() {
+    this._querySpots();
   }
 
   _goToSpot(spot) {
@@ -123,13 +146,19 @@ class SpotList extends Component {
   render() {
     return (
         <View style={styles.container}>
-          {this.state.isLoading ? <ActivityIndicator animating={this.state.isLoading} style={styles.progressBar} size={'large'} /> : null}
           <ListView
               style={styles.spotList}
               contentContainerStyle={styles.content}
               enableEmptySections={true}
               dataSource={this.state.spots || []}
               renderRow={this._renderCard.bind(this)}
+              refreshControl={
+                <RefreshControl
+                  title="Finding spots close to you..."
+                  refreshing={this.state.isLoading}
+                  onRefresh={this._onRefresh.bind(this)}
+                />
+              }
           />
         </View>
     );
@@ -155,7 +184,7 @@ class SpotList extends Component {
         <View style={styles.imageContainer}>
           <Image
               style={styles.image}
-              source={spot.get('picture') ? {uri: spot.get('picture').url()} : require('../../img/kombi.jpg')}/>
+              source={spot.get('picture') ? {uri: spot.get('picture').url()} : require('../../img/default_spot_image.jpg')}/>
         </View>
     );
   }
@@ -168,8 +197,8 @@ class SpotList extends Component {
             <Text style={styles.rating}>{spot.get('overall_rating') ? spot.get('overall_rating')+"/5" : "No reviews"}</Text>
           </View>
           <View style={styles.contentLocation}>
-            <Icon style={styles.contentLocationIcon} name="location-on" size={14} color="#555" />
             <Text style={styles.contentLocationDistance}>{this.state.currentPosition ? this._getDistanceFrom(spot) : ""}</Text>
+            <Icon style={styles.contentLocationIcon} name="location-on" size={14} color="#555" />
             <Text style={styles.contentLocationAddress}>{spot.get('shortLocation')}</Text>
           </View>
         </View>
@@ -185,8 +214,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
+    marginTop:100
   },
   spotList: {
     flex: 1,

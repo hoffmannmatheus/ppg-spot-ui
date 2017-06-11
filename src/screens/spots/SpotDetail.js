@@ -75,7 +75,8 @@ class SpotDetail extends Component {
           useNativeDriver={true}>
           <Image
             style={styles.image}
-            source={{uri: spot.get('picture').url()}}/>
+            source={spot.get('picture') ? {uri: spot.get('picture').url()} : require('../../../img/default_spot_image.jpg')}/>
+
         </Animatable.View>
     );
   }
