@@ -14,7 +14,7 @@ class App {
   constructor() {
 
     Parse.initialize("ParamotorSpots");
-    Parse.serverURL = "http://ppg-spots.mhsilva.io:1338/parse";
+    Parse.serverURL = "http://bluecensus.mhsilva.io:1338/parse";
 
     this._populateIcons().then(() => {
       this._startApp();
