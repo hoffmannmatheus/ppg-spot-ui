@@ -24,6 +24,8 @@ class SpotDetail extends Component {
     navBarTransparent: true
   };
 
+  inputs = {};
+
   constructor(props) {
     super(props);
     this.state = {
@@ -45,31 +47,31 @@ class SpotDetail extends Component {
                 autoCapitalize="words"
                 returnKeyType="next"
                 onChangeText={(name) => this.setState({name})}
-                onSubmitEditing={this._focusField.bind(this, 'emailInput')}/>
+                onSubmitEditing={() => {this._focusField.bind(this, 'emailInput')}}/>
             <SignUpInput
-                ref='emailInput'
+                ref={input => {this.inputs['emailInput'] = input}}
                 placeholder="Email"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 returnKeyType="next"
                 onChangeText={(email) => this.setState({email})}
-                onSubmitEditing={this._focusField.bind(this, 'pwdInput')}/>
+                onSubmitEditing={() => {this._focusField.bind(this, 'pwdInput')}}/>
             <SignUpInput
-                ref='pwdInput'
+                ref={input => {this.inputs['pwdInput'] = input}}
                 placeholder="Password"
                 autoCapitalize="none"
                 returnKeyType="next"
                 secureTextEntry={true}
                 onChangeText={(password) => this.setState({password})}
-                onSubmitEditing={this._focusField.bind(this, 'confirmPwdInput')}/>
+                onSubmitEditing={() => {this._focusField.bind(this, 'confirmPwdInput')}}/>
             <SignUpInput
-                ref='confirmPwdInput'
+                ref={input => {this.inputs['confirmPwdInput'] = input}}
                 placeholder="Password Confirmation"
                 autoCapitalize="none"
                 returnKeyType="go"
                 secureTextEntry={true}
                 onChangeText={(password_confirmation) => this.setState({password_confirmation})}
-                onSubmitEditing={this._doSignUp.bind(this)} />
+                onSubmitEditing={() => {this._doSignUp.bind(this)}}/>
           </View>
           <View style={styles.buttons}>
             {this.state.isSigningUp
@@ -85,8 +87,7 @@ class SpotDetail extends Component {
   }
 
   _focusField(nextField) {
-    // Fixme: issue trying to set focus to the TextInput custom component
-    //this.refs[nextField].focus();
+    this.inputs[nextField].focus();
   }
 
   _doSignUp() {
@@ -164,6 +165,7 @@ class SignUpInput extends Component {
         spellCheck = {false}
         numberOfLines = {1}
         maxLength = {70}
+        blurOnSubmit={false} // may need to disable on the last input
         {...this.props}
       />
     );
